@@ -1,4 +1,4 @@
-namespace BookStoreApi.Models;
+namespace PhotoTaggingApi.Models;
 
 public class PhotoTaggingDatabaseSettings
 {

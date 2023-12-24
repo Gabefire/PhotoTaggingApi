@@ -2,7 +2,6 @@ using PhotoTaggingApi.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using Tag = PhotoTaggingApi.Models.Tag;
-using BookStoreApi.Models;
 
 namespace PhotoTaggingApi.Services;
 

@@ -1,7 +1,6 @@
 using PhotoTaggingApi.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
-using BookStoreApi.Models;
 
 namespace PhotoTaggingApi.Services;
 
