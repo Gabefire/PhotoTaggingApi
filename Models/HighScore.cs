@@ -6,4 +6,6 @@ namespace PhotoTaggingApi.Models;
 public class HighScore
 {
     public decimal Time { get; set; }
+
+    public string User { get; set; } = "anonymous";
 }
