@@ -3,6 +3,7 @@ using PhotoTaggingApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using SessionVariable;
 using UserSessionVariable;
+using System.Data;
 
 
 namespace PhotoTaggingApi.Controllers;
@@ -18,17 +19,19 @@ public class SessionController : ControllerBase
         var userName = HttpContext.Session.GetString(UserSessionKeyEnum.SessionKeyUsername.ToString());
         List<string> sessionInfo = new List<string>();
 
-        if (string.IsNullOrWhiteSpace(HttpContext.Session.GetString(SessionKeyEnum.SessionKeyUsername.ToString())))
-        {
-            HttpContext.Session.SetString(SessionKeyEnum.SessionKeyUsername.ToString(), userName);
-            HttpContext.Session.SetString(SessionKeyEnum.SessionKeySessionId.ToString(), Guid.NewGuid().ToString());
-        }
+
+        DateTime UTCTime = DateTime.UtcNow;
+        HttpContext.Session.SetString(SessionKeyEnum.SessionKeyUsername.ToString(), userName!);
+        HttpContext.Session.SetString(SessionKeyEnum.SessionKeySessionDate.ToString(), UTCTime.ToString());
+        HttpContext.Session.SetString(SessionKeyEnum.SessionKeySessionId.ToString(), Guid.NewGuid().ToString());
 
         var username = HttpContext.Session.GetString(SessionKeyEnum.SessionKeyUsername.ToString());
+        var UtcTime = HttpContext.Session.GetString(SessionKeyEnum.SessionKeySessionDate.ToString());
         var sessionId = HttpContext.Session.GetString(SessionKeyEnum.SessionKeySessionId.ToString());
 
         sessionInfo.Add(username!);
         sessionInfo.Add(sessionId!);
+
 
         return sessionInfo;
 
