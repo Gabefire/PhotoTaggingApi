@@ -1,0 +1,6 @@
+@PhotoTaggingApi_HostAddress = http://localhost:5030
+
+GET {{PhotoTaggingApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
