@@ -2,11 +2,12 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace PhotoTaggingApi.Models;
 
+[BsonIgnoreExtraElements]
 public class User
 {
     [BsonRequired]
-    public string UserName { get; set; } = null!;
+    public string Username { get; set; } = string.Empty;
 
     [BsonRequired]
-    public string Password { get; set; } = null!;
+    public string PasswordHash { get; set; } = string.Empty;
 }
