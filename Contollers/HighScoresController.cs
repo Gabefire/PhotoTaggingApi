@@ -2,26 +2,43 @@ using PhotoTaggingApi.Models;
 using PhotoTaggingApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using SessionVariable;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using Microsoft.Extensions.Configuration.UserSecrets;
+using MongoDB.Bson;
+using Microsoft.AspNetCore.Authorization;
 
 
 namespace PhotoTaggingApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class HighScoreController(HighScoreService highScoreService) : ControllerBase
+public class HighScoreController(HighScoreService highScoreService, UsersService usersService) : ControllerBase
 {
     public static HighScore highScore = new HighScore();
     private readonly HighScoreService _highScoreService = highScoreService;
 
-    [HttpGet]
-    public async Task<List<HighScore>> Get() =>
-        await _highScoreService.GetAsync();
+    private readonly UsersService _usersService = usersService;
 
-    [HttpPost]
+    [HttpGet]
+    public async Task<List<HighScoreDto>> Get()
+    {
+
+        List<HighScoreDto> formattedHighScores = [];
+        var highScoreList = await _highScoreService.GetAsync();
+        foreach (HighScore highScore in highScoreList)
+        {
+            HighScoreDto highScoreDto = new();
+            string userId = new(highScore.UserId);
+            var user = await _usersService.GetAsyncId(userId);
+            highScoreDto.UserName = user.Username as string;
+            highScoreDto.Time = highScore.Time;
+
+            formattedHighScores.Add(highScoreDto);
+        };
+        return formattedHighScores;
+    }
+
+
+    [HttpPost, Authorize]
     public async Task<IActionResult> AddHighScore()
     {
         try
@@ -32,7 +49,11 @@ public class HighScoreController(HighScoreService highScoreService) : Controller
             var handler = new JwtSecurityTokenHandler();
             var jwtToken = handler.ReadToken(token.Split(" ")[1]) as JwtSecurityToken ?? throw new Exception("No token");
 
-            var userId = jwtToken.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value;
+            string userId = jwtToken.Claims.First(claim => claim.Type == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier").Value ?? throw new Exception("Not a valid ID");
+
+            //Verify user exists
+
+            await _usersService.GetAsyncId(userId);
 
 
             //Session section for date time

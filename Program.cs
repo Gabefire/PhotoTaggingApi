@@ -1,3 +1,6 @@
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using PhotoTaggingApi.Models;
 using PhotoTaggingApi.Services;
@@ -13,7 +16,27 @@ builder.Services.AddSingleton<UsersService>();
 builder.Services.AddSingleton<HighScoreService>();
 builder.Services.AddControllers();
 
-builder.Services.AddAuthentication().AddJwtBearer();
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(x =>
+{
+    x.RequireHttpsMetadata = false;
+    var key = Encoding.UTF8.GetBytes(builder.Configuration["JwtSettings:Key"]!);
+    x.SaveToken = true;
+    // remove/change the below two in deployment
+    x.Authority = builder.Configuration["JwtSettings:Authority"]!;
+    if (builder.Environment.IsDevelopment())
+    {
+        x.RequireHttpsMetadata = false;
+    }
+    x.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
 
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>

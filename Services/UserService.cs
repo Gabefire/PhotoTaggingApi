@@ -1,6 +1,7 @@
 using PhotoTaggingApi.Models;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace PhotoTaggingApi.Services;
 
@@ -27,5 +28,8 @@ public class UsersService
 
     public async Task<User> GetAsync(string username) =>
         await _usersCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
+
+    public async Task<User> GetAsyncId(string userId) =>
+        await _usersCollection.Find(x => x.Id.ToString() == userId).FirstOrDefaultAsync();
 
 }
