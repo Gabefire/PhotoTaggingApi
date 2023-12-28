@@ -1,11 +1,11 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-
 namespace PhotoTaggingApi.Models;
 
 public class HighScore
 {
-    public decimal Time { get; set; }
+    [BsonRequired]
+    public double Time { get; set; }
 
-    public string User { get; set; } = "anonymous";
+    public string UserId { get; set; } = string.Empty;
 }

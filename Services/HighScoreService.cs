@@ -23,7 +23,7 @@ public class HighScoreService
     }
 
     public async Task<List<HighScore>> GetAsync() =>
-        await _highScoresCollection.Find(_ => true).ToListAsync();
+        await _highScoresCollection.Find(_ => true).SortBy(i => i.Time).Limit(10).ToListAsync();
 
     public async Task CreateAsync(HighScore newHighScore) =>
         await _highScoresCollection.InsertOneAsync(newHighScore);

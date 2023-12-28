@@ -10,21 +10,20 @@ namespace PhotoTaggingApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IConfiguration configuration, UsersService usersService) : ControllerBase
 {
-    public static User user = new User();
-    private readonly IConfiguration _configuration;
-    private readonly UsersService _usersService;
-    public AuthController(IConfiguration configuration, UsersService usersService)
-    {
-        _configuration = configuration;
-        _usersService = usersService;
-    }
-
+    private static User user = new();
+    private readonly IConfiguration _configuration = configuration;
+    private readonly UsersService _usersService = usersService;
 
     [HttpPost("register")]
     public async Task<IActionResult> Register(UserDto request)
     {
+        if (request.Username == null || request.Password == null)
+        {
+            return BadRequest("Please include a username and password");
+        }
+
         string passwordHash
             = BCrypt.Net.BCrypt.HashPassword(request.Password);
 
@@ -33,6 +32,9 @@ public class AuthController : ControllerBase
 
         try
         {
+            // Check if username is taken
+            var userTest = await _usersService.GetAsync(request.Username) ?? throw new Exception("Name already token");
+
             await _usersService.CreateAsync(user);
             return Ok(user);
         }
@@ -50,10 +52,10 @@ public class AuthController : ControllerBase
 
         if (user == null)
         {
-            return BadRequest("Username or password is incorrect.");
+            return BadRequest("No user");
         }
 
-        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return BadRequest("Username or password is incorrect.");
         }
@@ -65,10 +67,10 @@ public class AuthController : ControllerBase
 
     private string CreateToken(User user)
     {
-        List<Claim> claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, user.Username)
-        };
+        List<Claim> claims =
+        [
+            new(ClaimTypes.NameIdentifier, user.Id.ToString()),
+        ];
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
             _configuration.GetSection("JwtSettings:Key").Value!
